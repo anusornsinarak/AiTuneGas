@@ -1,0 +1,6 @@
+{
+  "name": "AI Gas Tuning Assistant",
+  "description": "Frontend Dashboard and Python Backend Setup Guide for AI Car Gas Tuning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
