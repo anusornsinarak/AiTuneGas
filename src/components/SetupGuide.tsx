@@ -215,10 +215,18 @@ if __name__ == '__main__':
               </div>
             </div>
 
-             <div className="w-full text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs">
-                    <Info size={14} />
-                    <span>หากดับเบิ้ลคลิกไม่ได้ แปลว่ายังไม่ได้ลง Python ในเครื่องคอมพิวเตอร์ <a href="https://www.python.org/downloads/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">ดาวน์โหลด Python ได้ที่นี่</a></span>
+             <div className="w-full text-center space-y-4">
+                <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm text-left">
+                    <h4 className="font-bold flex items-center gap-2 mb-2">
+                      <Info size={16} /> ดับเบิ้ลคลิกแล้วไม่เกิดอะไรขึ้น ใช่ไหม?
+                    </h4>
+                    <p className="mb-2">นั่นเป็นเพราะเครื่องของคุณยังไม่ได้ติดตั้งโปรแกรม <strong>Python</strong> ครับ</p>
+                    <ol className="list-decimal ml-5 space-y-1 text-amber-700">
+                      <li>ไปที่ <b>Microsoft Store</b> ใน Windows ค้นหาคำว่า "Python 3.11" แล้วกดติดตั้ง (ง่ายที่สุด)</li>
+                      <li>หรือ ดาวน์โหลดจาก <a href="https://www.python.org/downloads/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">Python.org</a> <br/>
+                      <span className="text-red-600 font-semibold">*สำคัญมาก:*</span> ตอนกดติดตั้ง ต้อง<b>ติ๊กถูกที่ช่อง "Add python.exe to PATH"</b> (อยู่ด้านล่างสุดของตัวติดตั้ง) ด้วยนะครับ ไม่เช่นนั้นระบบจะหาโปรแกรมไม่เจอ</li>
+                      <li>ติดตั้งเสร็จ ลองดับเบิ้ลคลิกไฟล์ใหม่อีกครั้ง หากเปิดขึ้นมาเป็นหน้าต่างสีดำ (Terminal) ถือว่าใช้งานได้แล้ว!</li>
+                    </ol>
                 </div>
             </div>
 
