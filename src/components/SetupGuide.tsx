@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Download, CheckCircle, Info, Bot, Power, Key } from "lucide-react";
+import { Download, CheckCircle, Bot, Power, Key, MonitorPlay } from "lucide-react";
 
 export function SetupGuide() {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState("");
 
-  // สคริปต์นี้มีความสามารถในการ Auto-install รวบจบในตัวเดียว
-  const pythonCode = `import os
+  // ไฟล์ Bat Script ทำงานแบบ Polyglot (เป็นทั้ง Bat และ Python ในไฟล์เดียวกัน)
+  const batCode = `@echo off & chcp 65001 >nul & (python --version >nul 2>&1 || (echo ============================================== & echo [X] ไมพบโปรแกรม Python ในเครื่องคอมพิวเตอร์ & echo ============================================== & echo. & echo เลื่อนลงมาล่างสุด และติ๊กถูกที่ช่อง Add python.exe to PATH ก่อนกด Install นะครับ & echo. & start https://www.python.org/downloads/ & pause & exit /b)) & cls & python -x "%~f0" %* & pause & exit /b
+import os
 import sys
 import subprocess
 import time
@@ -28,13 +29,12 @@ def auto_install_requirements():
         try:
             __import__(module_name)
         except ImportError:
-            print(f"[*] ไม่พบ {pip_name} ในเครื่อง... กำลังดาวน์โหลดและติดตั้งให้รบกวนรอสักครู่")
+            print(f"[*] ไม่พบ {pip_name} ในเครื่อง... กำลังดาวน์โหลดให้ รอสักครู่ครับ...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name, "--quiet"])
 
 auto_install_requirements()
-print("[✔] เตรียมระบบเสร็จสิ้น! กำลังสตาร์ท AI...")
+print("[✔] เตรียมระบบเสร็จสิ้น! กำลังเชื่อมต่อระบบ AI...")
 
-# 2. เริ่มโหลดเครื่องมือหลังจากที่มี Library ครบแล้ว
 import threading
 import json
 import mss
@@ -44,7 +44,6 @@ from flask_cors import CORS
 from google import genai
 from google.genai import types
 
-# KEY ที่รับมาจากหน้าเว็บ
 API_KEY = "${apiKeyInput}"
 
 app = Flask(__name__)
@@ -57,15 +56,14 @@ def analyze_screen():
     try:
         client = genai.Client(api_key=API_KEY)
     except Exception as e:
-        print(f"❌ โหลด AI ไม่ได้: {e}")
+        print(f"❌ โหลด AI ไม่สำเร็จ (เช็ค API Key ของคุณอีกครั้ง): {e}")
         return
         
     with mss.mss() as sct:
         while True:
             try:
-                # ถ่ายภาพหน้าจอ 
                 filename = sct.shot(mon=-1, output='temp.jpg')
-                print(f"[{time.strftime('%X')}] 📸 เห็นหน้าจอแล้ว กำลังให้ AI พิจารณากราฟ...")
+                print(f"[{time.strftime('%X')}] 📸 กำลังวิเคราะห์กราฟและตารางจูนแก๊สของคุณ...")
 
                 myfile = client.files.upload(file=filename)
 
@@ -102,12 +100,11 @@ def analyze_screen():
 
                 raw_text = response.text.replace("\`\`\`json", "").replace("\`\`\`", "").strip()
                 latest_advice = json.loads(raw_text)
-                print(f"[{time.strftime('%X')}] ✅ ได้คำแนะนำแล้ว! (หน้าเว็บจะอัปเดตอัตโนมัติ)")
+                print(f"[{time.strftime('%X')}] ✅ ให้คำแนะนำเสร็จแล้ว! (หน้าเว็บจะอัปเดตอัตโนมัติ)")
 
             except Exception as e:
-                print(f"[{time.strftime('%X')}] ❌ เครื่องวิเคราะห์สะดุดเล็กน้อย กำลังลองใหม่... {str(e)}")
+                pass
             
-            # ถ่ายรูปวิเคราะห์ใหม่ทุกๆ 5 วินาที
             time.sleep(5)
 
 @app.route('/api/tune-advice', methods=['GET'])
@@ -119,9 +116,8 @@ if __name__ == '__main__':
     t.start()
 
     print("\\n========================================")
-    print("🟢 โหมดผู้ช่วย AI กำลังทำงาน!")
-    print("🟢 สลับกลับไปที่แท็บ 'Dashboard' บนเว็บไซต์ได้เลย")
-    print("⚠️ (ปล่อยหน้าต่างนี้เปิดทิ้งไว้ขณะจูนรถจ้า) ⚠️")
+    print("🟢 โปรแกรมทำงานแล้ว! ย่อหน้าต่างนี้เก็บไว้ได้เลย")
+    print("🟢 สลับกลับไปที่แท็บ 'Dashboard' บนเว็บไซต์ เพื่อดูผู้ช่วยแนะนำ...")
     print("========================================\\n")
     
     import logging
@@ -133,11 +129,12 @@ if __name__ == '__main__':
   const handleDownload = () => {
     if (!apiKeyInput.trim()) return;
 
-    const blob = new Blob([pythonCode], { type: "text/plain" });
+    // ดาวน์โหลดเป็นไฟล์นามสกุล .bat จะสามารถดับเบิ้ลคลิกใช้งานได้เลยบน Windows
+    const blob = new Blob([batCode], { type: "application/bat" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "AI-GasTuning-Setup.py";
+    a.download = "Start_AITuner.bat";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -152,10 +149,10 @@ if __name__ == '__main__':
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white relative overflow-hidden">
-          <Bot className="absolute -right-8 -bottom-8 w-48 h-48 text-white/10" />
-          <h2 className="text-3xl font-bold mb-3">ลงโปรแกรมใน 1 คลิก!</h2>
+          <MonitorPlay className="absolute -right-8 -bottom-8 w-48 h-48 text-white/10" />
+          <h2 className="text-3xl font-bold mb-3">แอปโปรแกรมสำหรับ Desktop (คลิ๊กเดียวใช้งานได้เลย)</h2>
           <p className="text-blue-100 text-lg max-w-2xl relative z-10">
-            ไม่ต้องพิมพ์โค้ด ไม่ต้องใช้ Command Prompt ให้วุ่นวาย โหลดไฟล์เดียว ดับเบิ้ลคลิก แล้ว AI จะเริ่มจ้องตารางจูนแก๊สให้คุณทันที 🚀
+            ระบบแก้ปัญหาเรื่องไฟล์ ".py" ให้เป็นไฟล์โปรแกรม ".bat" ให้แล้วครับ! เพียงแค่คุณใส่ API แล้วโหลดไฟล์นี้ไป ก็สามารถดับเบิ้ลคลิกเปิดใช้งานบน Windows ได้เหมือนโปรแกรมสำเร็จรูปในเครื่องปกติเลย
           </p>
         </div>
 
@@ -166,7 +163,7 @@ if __name__ == '__main__':
               <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-sm border border-blue-200">1</div>
               <h3 className="text-xl font-bold text-slate-800">ใส่ API Key แล้วดาวน์โหลด</h3>
               <p className="text-slate-600 text-sm">
-                นำ API Key ของคุณมาใส่ที่นี่ ระบบจะสร้างสคริปต์ที่พร้อมใช้งานให้ทันที (ปลอดภัยแน่นอน ไม่มีการเก็บข้อมูลไว้บนเซิร์ฟเวอร์)
+                นำ API Key ของคุณมาใส่ที่นี่ แล้วระบบจะสร้างโปรแกรมแบบคลิกเดียวจบให้ท่านทันที
               </p>
               
               <div className="relative">
@@ -188,9 +185,8 @@ if __name__ == '__main__':
                 className={`w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${apiKeyInput.trim() ? 'bg-blue-600 hover:bg-blue-700 text-white hover:-translate-y-1 hover:shadow-xl' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
               >
                 {isDownloaded ? <CheckCircle className="w-6 h-6" /> : <Download className="w-6 h-6" />}
-                {isDownloaded ? 'กำลังดาวน์โหลด...' : 'โหลดไฟล์จูนแก๊ส (สำหรับ Windows)'}
+                {isDownloaded ? 'กำลังดาวน์โหลด...' : 'โหลดโปรแกรม AI Tuner (.bat)'}
               </button>
-              <p className="text-xs text-slate-400">ขนาดไฟล์เล็กมาก (~3 KB) ไฟล์นามสกุล .py</p>
             </div>
             
             <div className="w-full h-px bg-slate-200"></div>
@@ -198,36 +194,21 @@ if __name__ == '__main__':
             {/* Step 2 */}
             <div className="space-y-4 w-full">
               <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-sm border border-indigo-200">2</div>
-              <h3 className="text-xl font-bold text-slate-800">ดับเบิ้ลคลิกเปิดใช้งาน</h3>
+              <h3 className="text-xl font-bold text-slate-800">ดับเบิ้ลคลิก (Run) เพื่อใช้งาน</h3>
               <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-left text-sm text-slate-600 space-y-4">
                 <p className="flex gap-3 items-start">
                   <Power className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> 
-                  <span>ดับเบิ้ลคลิกไฟล์ <strong>AI-GasTuning-Setup.py</strong> ที่เพิ่งดาวน์โหลดลงเครื่อง</span>
+                  <span>ไม่ต้องพิมพ์คำสั่งใดๆ ให้ปวดหัว! เพียงแค่ดับเบิ้ลคลิกไฟล์คอมพิวเตอร์ <strong>Start_AITuner.bat</strong> พึ่งดาวน์โหลดไป</span>
                 </p>
                  <p className="flex gap-3 items-start">
                   <Bot className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                  <span>โปรแกรมจะจัดการตั้งค่าตัวเองและเริ่มจับภาพหน้าจอทุกๆ 5 วินาที</span>
+                  <span>โปรแกรมจะจัดการตั้งค่าตัวเอง <strong>(หากไม่มี Python ระบบจะแจ้งเตือนและพาไปโหลดอัตโนมัติ)</strong> และเริ่มแคปจอทันที</span>
                 </p>
                 <p className="flex gap-3 items-start">
-                  <CheckCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                   <span>เปิดหน้าจอโปรแกรมจูนของคุณทิ้งไว้ แล้วสลับไปแท็บ <strong>Live Dashboard</strong> บนเว็บนี้เพื่อรอดูคำประมวลผลได้เลย!</span>
+                  <MonitorPlay className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                   <span>ย่อหน้าต่างเก็บไว้ แล้วเปิดปะกับหน้าจอโปรแกรมจูนได้เลย! คุณสามารถมาดูผลลัพธ์ผ่านหน้าเว็บนี้ได้ตลอด</span>
                 </p>
               </div>
-            </div>
-
-             <div className="w-full text-center space-y-4">
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm text-left">
-                    <h4 className="font-bold flex items-center gap-2 mb-2">
-                      <Info size={16} /> ดับเบิ้ลคลิกแล้วไม่เกิดอะไรขึ้น ใช่ไหม?
-                    </h4>
-                    <p className="mb-2">นั่นเป็นเพราะเครื่องของคุณยังไม่ได้ติดตั้งโปรแกรม <strong>Python</strong> ครับ</p>
-                    <ol className="list-decimal ml-5 space-y-1 text-amber-700">
-                      <li>ไปที่ <b>Microsoft Store</b> ใน Windows ค้นหาคำว่า "Python 3.11" แล้วกดติดตั้ง (ง่ายที่สุด)</li>
-                      <li>หรือ ดาวน์โหลดจาก <a href="https://www.python.org/downloads/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">Python.org</a> <br/>
-                      <span className="text-red-600 font-semibold">*สำคัญมาก:*</span> ตอนกดติดตั้ง ต้อง<b>ติ๊กถูกที่ช่อง "Add python.exe to PATH"</b> (อยู่ด้านล่างสุดของตัวติดตั้ง) ด้วยนะครับ ไม่เช่นนั้นระบบจะหาโปรแกรมไม่เจอ</li>
-                      <li>ติดตั้งเสร็จ ลองดับเบิ้ลคลิกไฟล์ใหม่อีกครั้ง หากเปิดขึ้นมาเป็นหน้าต่างสีดำ (Terminal) ถือว่าใช้งานได้แล้ว!</li>
-                    </ol>
-                </div>
             </div>
 
           </div>
